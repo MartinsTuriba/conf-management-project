@@ -1,0 +1,29 @@
+---
+- name: Setup NGINX Container
+  hosts: local
+  gather_facts: false
+  
+  tasks:
+    - name: Create NGINX container
+      docker_container:
+        name: nginx-server
+        image: nginx:latest
+        state: started
+        ports:
+          - "80:80"
+        volumes:
+          - "{{ playbook_dir }}/html:/usr/share/nginx/html"
+      register: container_result
+    
+    - name: Display container info
+      debug:
+        var: container_result
+
+    - name: Verify NGINX is running
+      uri:
+        url: http://localhost:80
+        return_content: yes
+      register: webpage
+      until: webpage.status == 200
+      retries: 5
+      delay: 10
