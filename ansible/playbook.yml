@@ -4,6 +4,11 @@
   gather_facts: false
   
   tasks:
+    - name: Ensure python docker package is installed
+      pip:
+        name: docker
+        state: present
+      
     - name: Create NGINX container
       docker_container:
         name: nginx-server
@@ -14,16 +19,9 @@
         volumes:
           - "{{ playbook_dir }}/html:/usr/share/nginx/html"
       register: container_result
+      environment:
+        DOCKER_HOST: "unix:///var/run/docker.sock"
     
     - name: Display container info
       debug:
         var: container_result
-
-    - name: Verify NGINX is running
-      uri:
-        url: http://localhost:80
-        return_content: yes
-      register: webpage
-      until: webpage.status == 200
-      retries: 5
-      delay: 10

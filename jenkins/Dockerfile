@@ -31,4 +31,7 @@ RUN python3 -m venv /opt/venv && \
 # Set the PATH for the virtual environment
 ENV PATH="/opt/venv/bin:$PATH"
 
+# Set permissions for non-root Docker access
+RUN chmod 666 /var/run/docker.sock || true
+
 USER jenkins
