@@ -13,6 +13,7 @@ RUN apt-get update && \
     python3-pip \
     python3-venv \
     ansible \
+    python3-docker \
     sshpass \
     openssh-client
 
@@ -23,15 +24,19 @@ RUN curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /
     apt-get update && \
     apt-get install -y docker-ce-cli
 
-# Create a virtual environment and install Python packages within it
+# Create virtual environment and install Python packages
 RUN python3 -m venv /opt/venv && \
     /opt/venv/bin/pip install --upgrade pip && \
     /opt/venv/bin/pip install docker ansible
 
-# Set the PATH for the virtual environment
-ENV PATH="/opt/venv/bin:$PATH"
+# Create docker group and add jenkins user
+RUN groupadd -g 999 docker || true && \
+    usermod -aG docker jenkins
 
-# Set permissions for non-root Docker access
-RUN chmod 666 /var/run/docker.sock || true
+# Ensure proper permissions for Docker socket
+RUN mkdir -p /var/run && \
+    touch /var/run/docker.sock && \
+    chmod 666 /var/run/docker.sock
 
 USER jenkins
+ENV PATH="/opt/venv/bin:${PATH}"

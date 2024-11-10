@@ -4,11 +4,7 @@
   gather_facts: false
   
   tasks:
-    - name: Ensure python docker package is installed
-      pip:
-        name: docker
-        state: present
-      
+    # Remove the pip install task since we're using system package
     - name: Create NGINX container
       docker_container:
         name: nginx-server
@@ -18,9 +14,9 @@
           - "80:80"
         volumes:
           - "{{ playbook_dir }}/html:/usr/share/nginx/html"
-      register: container_result
       environment:
         DOCKER_HOST: "unix:///var/run/docker.sock"
+      register: container_result
     
     - name: Display container info
       debug:
